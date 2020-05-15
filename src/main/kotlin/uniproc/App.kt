@@ -11,7 +11,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 
-private val VALID_TARGETS = { "Java" }
+private val VALID_TARGETS = {  }
 private val VALID_TARGETS_LIST = listOf(VALID_TARGETS)
 
 class App: CliktCommand() {
@@ -24,7 +24,7 @@ class App: CliktCommand() {
         if (validateArgs(interactive, outputPath, targetLanguage, source)) {
             if (interactive) {
                 // all we can do for now is print a demo
-                val parser = Parser(verbose=true)
+                val parser = Parser(verbose=verbose)
                 while(true) {
                     print("> ")
                     val line = readLine()
@@ -34,16 +34,31 @@ class App: CliktCommand() {
                         break
                     }
                 }
+            } else {
+                if (outputPath == null && source != null && source!!.canRead()) {
+                    val parser = Parser(verbose=verbose)
+                    source!!.readLines().forEach {
+                        if (parser.healthy) {
+                            parser.executeTokens(parser.parseLine(it))
+                        }
+                    }
+                }
             }
         }
     }
 
-    fun validateArgs(interactive: Boolean, outputPath: String?, targetLanguage: String?, source: File?): Boolean {
+    private fun validateArgs(interactive: Boolean, outputPath: String?, targetLanguage: String?, source: File?): Boolean {
         return if (interactive && (outputPath != null || source != null)) {
             System.err.println("Cannot start in interactive mode and have an output or input file!")
             false
         } else if (targetLanguage != null && !VALID_TARGETS_LIST.contains { targetLanguage }) {
             System.err.println("$targetLanguage is not valid!")
+            false
+        } else if (outputPath != null){
+            System.err.println("No output file specified but cross-compile specified!")
+            false
+        } else if (source != null && !source.canRead()){
+            System.err.println("Cannot read input file \"${source?.absoluteFile}\"!")
             false
         } else {
             true

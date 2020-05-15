@@ -1,0 +1,25 @@
+DOC Let's print some text. Note that quotes aren't important.
+PRINT Hello there!
+DOC ASSIGN let's us set a reference (noticed the "@" symbol) to a value.
+DOC INPUT takes a string and gets a value from the user
+ASSIGN @NAME INPUT What's your name?
+DOC you can evaluation a reference in most operations
+PRINT Hello @NAME
+
+DOC let's do some basic arithmetic
+ASSIGN @x 1.0
+ASSIGN @y 2
+ASSIGN @result @x + @y
+DOC should be 3.0
+PRINT @result
+ASSIGN @result @result + @x
+DOC should be 4.0
+DOC this is a nice feature of UniProc Basic
+DOC the previous version of a reference is preserved
+ASSIGN @result @result + @result.previous1
+DOC should be 7.0
+PRINT @result
+DOC you can also see the VM's execution history
+HISTORY
+DOC you can also raise an error to break flow
+RAISE ending program

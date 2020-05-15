@@ -3,6 +3,10 @@ package uniproc.internal.operators
 import uniproc.Vm
 import uniproc.internal.Token
 
+fun isVariable(value: String): Boolean {
+    return value != null && value.trim().startsWith("@")
+}
+
 abstract class Operator (val name: String) {
 
     // operations act on a vm and return a list of unconsumed tokens
