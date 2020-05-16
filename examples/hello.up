@@ -18,8 +18,22 @@ DOC this is a nice feature of UniProc Basic
 DOC the previous version of a reference is preserved
 ASSIGN @result @result + @result.previous1
 DOC should be 7.0
-PRINT @result
-DOC you can also see the VM's execution history
-HISTORY
-DOC you can also raise an error to break flow
-RAISE ending program
+PRINT Does 7.0 = @result
+
+PROCEDURE test
+PRINT testing...
+END
+
+EXECUTE test
+
+DOC simple counter
+ASSIGN @i 10
+PROCEDURE count down
+PRINT @i
+ASSIGN @i @i - 1
+IF @i EXECUTE count down
+END
+
+EXECUTE count down
+
+PRINT Good Bye!

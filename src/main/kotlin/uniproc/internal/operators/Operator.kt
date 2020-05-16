@@ -4,7 +4,7 @@ import uniproc.Vm
 import uniproc.internal.Token
 
 fun isVariable(value: String): Boolean {
-    return value != null && value.trim().startsWith("@")
+    return value != null && value.trim().startsWith("@") && value.trim().length>1
 }
 
 abstract class Operator (val name: String) {

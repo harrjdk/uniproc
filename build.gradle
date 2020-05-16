@@ -23,10 +23,10 @@ dependencies {
     implementation platform('org.jetbrains.kotlin:kotlin-bom')
 
     // Use the Kotlin JDK 8 standard library.
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 
     // Clikt for CLI handling
-    implementation group: 'com.github.ajalt', name: 'clikt', version: '2.6.0'
+    compile group: 'com.github.ajalt', name: 'clikt', version: '2.6.0'
 
     // Use the Kotlin test library.
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
@@ -38,4 +38,15 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClassName = 'uniproc.AppKt'
+}
+
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',
+                'Implementation-Version': '0.0.2',
+                'Main-Class': 'uniproc.AppKt'
+    }
+    archiveBaseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
 }

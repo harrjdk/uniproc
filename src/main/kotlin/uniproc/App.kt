@@ -11,8 +11,7 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
 
-private val VALID_TARGETS = {  }
-private val VALID_TARGETS_LIST = listOf(VALID_TARGETS)
+private val VALID_TARGETS_LIST = listOf("JAVA")
 
 class App: CliktCommand() {
     private val verbose by option("--verbose", "-v", help="Enable Verbose Logging").flag(default = false)
@@ -40,7 +39,27 @@ class App: CliktCommand() {
                     source!!.readLines().forEach {
                         if (parser.healthy) {
                             parser.executeTokens(parser.parseLine(it))
+                        } else {
+                            println("Terminated on execution line ${parser.lineCount}")
                         }
+                    }
+                } else if (outputPath != null && source != null && source!!.canRead()) {
+                    val parser = Parser(verbose=verbose)
+                    val outFile = File(outputPath)
+                    if (!outFile.exists()) {
+                        outFile.createNewFile()
+                    }
+                    if (outFile.canWrite()) {
+                        source!!.readLines().forEach {
+                            if (parser.healthy) {
+                                parser.compileTokens(parser.parseLine(it))
+                            } else {
+                                System.err.println("An error occurred while compiling source!")
+                            }
+                        }
+                        outFile.writeText(parser.getCompiledCode(outFile.nameWithoutExtension))
+                    } else {
+                        System.err.println("Cannot write to file ${outFile.absoluteFile}!")
                     }
                 }
             }
@@ -51,10 +70,10 @@ class App: CliktCommand() {
         return if (interactive && (outputPath != null || source != null)) {
             System.err.println("Cannot start in interactive mode and have an output or input file!")
             false
-        } else if (targetLanguage != null && !VALID_TARGETS_LIST.contains { targetLanguage }) {
+        } else if (targetLanguage != null && !VALID_TARGETS_LIST.contains(targetLanguage)) {
             System.err.println("$targetLanguage is not valid!")
             false
-        } else if (outputPath != null){
+        } else if (outputPath == null && targetLanguage != null){
             System.err.println("No output file specified but cross-compile specified!")
             false
         } else if (source != null && !source.canRead()){

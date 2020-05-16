@@ -3,7 +3,7 @@ package uniproc.internal.operators.math
 import uniproc.internal.ERROR_TYPE
 import uniproc.types.Structure
 
-val alphaCheck = Regex("[^0-9.]")
+val alphaCheck = Regex("[^0-9.-E]")
 
 enum class MathTypes(val string: String) {
     INT("Int"),

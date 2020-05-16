@@ -1,0 +1,4 @@
+ASSIGN @NAME Old World
+ASSIGN @NAME New World
+PRINT Hello, @NAME
+PRINT Hello, @NAME.previous1

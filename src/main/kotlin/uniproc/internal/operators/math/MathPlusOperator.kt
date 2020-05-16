@@ -6,6 +6,7 @@ import uniproc.VALUE_TOKEN
 import uniproc.Vm
 import uniproc.internal.ERROR_TYPE
 import uniproc.internal.Token
+import uniproc.internal.operators.JavaSupport
 import uniproc.internal.operators.Operator
 import uniproc.internal.operators.isVariable
 
