@@ -8,11 +8,12 @@ import uniproc.internal.ERROR_TYPE
 import uniproc.internal.Token
 import uniproc.internal.operators.Operator
 import uniproc.internal.operators.isVariable
+import kotlin.math.pow
 
-class MathDivOperator: Operator("/") {
+class MathPowOperator: Operator("POW") {
     override fun operation(vm: Vm, tokens: List<Token>, verbose: Boolean): List<Token> {
         if (verbose) {
-            println("[DEBUG] entering mathematic div operation")
+            println("[DEBUG] entering mathematic power operation")
         }
         if (tokens.isEmpty()) {
             return listOf(Token(ERROR_TYPE, "No right side to operation"))
@@ -55,24 +56,24 @@ class MathDivOperator: Operator("/") {
             var output = ""
             // now try and combine them, prefering the more precise type
             if (leftSide.type==MathTypes.FLOAT.string || rightSide.type==MathTypes.FLOAT.string) {
-                output = (leftSide.value.toDouble() / rightSide.value.toDouble()).toString()
+                output = leftSide.value.toDouble().pow(rightSide.value.toDouble()).toString()
             } else {
-                output = (leftSide.value.toInt() / rightSide.value.toInt()).toString()
+                output = leftSide.value.toDouble().pow(rightSide.value.toDouble()).toInt().toString()
             }
             // check if we have more possible chain operations
-            if(tokens.size > 1) {
+            return if(tokens.size > 1) {
                 // push this to the left side buffer
                 vm.setValueBuffer(Token(VALUE_TOKEN, output))
-                return tokens.drop(1)
+                tokens.drop(1)
             } else if (!vm.populateInputBuffer(output, "String")) {
                 vm.display(output)
-                return emptyList()
+                emptyList()
             } else {
                 vm.clearValueBuffer() // shouldn't let that keep propagating
-                return emptyList()
+                emptyList()
             }
         } else {
-            return listOf(Token(ERROR_TOKEN, "no value on the left side to divide"))
+            return listOf(Token(ERROR_TOKEN, "no value on the left side to apply power operation to."))
         }
     }
 }

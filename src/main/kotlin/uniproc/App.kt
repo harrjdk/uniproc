@@ -4,31 +4,32 @@
 package uniproc
 
 import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.flag
+import com.github.ajalt.clikt.parameters.options.multiple
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import java.io.File
+import kotlin.system.exitProcess
 
 private val VALID_TARGETS_LIST = listOf("JAVA")
 
 class App: CliktCommand() {
     private val verbose by option("--verbose", "-v", help="Enable Verbose Logging").flag(default = false)
-    private val interactive by option("--interactive", "-i", help="Start in interactive REPL mode").flag()
+    private val interactive by option("--interactive", "-r", help="Start in interactive REPL mode").flag()
     private val outputPath by option("--output", "-o", help="Output File Path")
     private val targetLanguage by option("-t", "--target", help="Target compile language")
-    private val source by argument().file().optional()
+    private val source by option("-i", "--input").file()
+    private val args: List<String> by option("-a", "-args").multiple()
     override fun run() {
         if (validateArgs(interactive, outputPath, targetLanguage, source)) {
             if (interactive) {
                 // all we can do for now is print a demo
                 val parser = Parser(verbose=verbose)
-                while(true) {
+                while(!parser.myVm.exit) {
                     print("> ")
                     val line = readLine()
                     if (line!=null && line.isNotEmpty()) {
-                        parser.executeTokens(parser.parseLine(line))
+                        parser.executeTokens(parser.parseLine(line), args)
                     } else {
                         break
                     }
@@ -37,10 +38,17 @@ class App: CliktCommand() {
                 if (outputPath == null && source != null && source!!.canRead()) {
                     val parser = Parser(verbose=verbose)
                     source!!.readLines().forEach {
-                        if (parser.healthy) {
-                            parser.executeTokens(parser.parseLine(it))
+                        if (parser.healthy && !parser.myVm.exit) {
+                            parser.executeTokens(parser.parseLine(it), args)
+                            if (parser.myVm.exit) {
+                                if (verbose) {
+                                    println("[DEBUG] shutting down...")
+                                }
+                                exitProcess(0)
+                            }
                         } else {
                             println("Terminated on execution line ${parser.lineCount}")
+                            exitProcess(1)
                         }
                     }
                 } else if (outputPath != null && source != null && source!!.canRead()) {
@@ -55,6 +63,7 @@ class App: CliktCommand() {
                                 parser.compileTokens(parser.parseLine(it))
                             } else {
                                 System.err.println("An error occurred while compiling source!")
+                                exitProcess(1)
                             }
                         }
                         outFile.writeText(parser.getCompiledCode(outFile.nameWithoutExtension))

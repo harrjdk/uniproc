@@ -1,0 +1,39 @@
+ASSIGN @input ARG 1
+ASSIGN @output BLANK
+
+PROCEDURE no
+PRINT No
+EXIT
+END
+
+PROCEDURE yes
+PRINT Yes
+EXIT
+END
+
+PROCEDURE checkChar
+ASSIGN @n @i + 1
+ASSIGN @c @len - @i
+ASSIGN @current @exploded AT @c
+ASSIGN @current2 @exploded AT @n
+STREQ @current @current2 EXECUTE continueCheck
+STRNE @current @current2 EXECUTE no
+END
+
+PROCEDURE continueCheck
+ASSIGN @i @n
+LTE @i @j EXECUTE checkChar
+END
+
+PROCEDURE palindrome
+ASSIGN @exploded EXPLODE @input
+ASSIGN @len LENGTH @exploded
+PRINT Checking string @input  with length @len
+ASSIGN @i 0
+ASSIGN @j @len / 2
+EXECUTE checkChar
+EXECUTE yes
+EXIT
+END
+
+EXECUTE palindrome

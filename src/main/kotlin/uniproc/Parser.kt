@@ -15,12 +15,13 @@ val res_old = listOf(
 val OPERATION_TOKEN = "OPERATOR"
 val VALUE_TOKEN = "VALUE"
 val ERROR_TOKEN = "ERROR"
+val EXIT_TOKEN = "EXIT"
 val NULL_TOKEN = "NULL"
 val NULL = Token(NULL_TOKEN, "")
 
 open class Parser(val verbose: Boolean = true, vm: Vm = Vm(verbose = verbose)) {
     var lineCount = 0
-    private val myVm = vm
+    val myVm = vm
     open var healthy = true
 
     fun parseLine(line: String): List<Token> {
@@ -54,10 +55,20 @@ open class Parser(val verbose: Boolean = true, vm: Vm = Vm(verbose = verbose)) {
         return tokens
     }
 
-    fun executeTokens(tokens: List<Token>) {
+    fun executeTokens(tokens: List<Token>, args: List<String> = emptyList()) {
+        if (myVm.exit) {
+            // we shouldn't be here anyway
+            return
+        }
         lineCount+=1
         if (verbose) {
             println("[DEBUG] current tokens: ${tokens.joinToString { token -> "${token.type}->${token.value}" }}")
+        }
+        args.forEachIndexed { index, it ->
+            if (verbose) {
+                println("[DEBUG] setting arg ${index+1} to $it")
+            }
+            myVm.setArg(index+1, it)
         }
         healthy = myVm.handleTokens(listOf(tokens))
     }

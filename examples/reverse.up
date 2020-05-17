@@ -1,0 +1,19 @@
+ASSIGN @input INPUT String?
+ASSIGN @output BLANK
+
+PROCEDURE pushChar
+ASSIGN @c @exploded AT @i
+ASSIGN @output CONCAT @output @c
+ASSIGN @i @i - 1
+GTE @i 1 EXECUTE pushChar
+END
+
+PROCEDURE reverse
+ASSIGN @exploded EXPLODE @input
+ASSIGN @len LENGTH @exploded
+ASSIGN @i @len
+EXECUTE pushChar
+END
+
+EXECUTE reverse
+PRINT @output

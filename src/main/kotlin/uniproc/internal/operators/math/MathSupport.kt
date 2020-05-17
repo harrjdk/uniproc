@@ -3,7 +3,7 @@ package uniproc.internal.operators.math
 import uniproc.internal.ERROR_TYPE
 import uniproc.types.Structure
 
-val alphaCheck = Regex("[^0-9.-E]")
+val alphaCheck = Regex("[^0-9.E\\-]")
 
 enum class MathTypes(val string: String) {
     INT("Int"),
@@ -18,7 +18,7 @@ fun castMathType(value: String, verbose: Boolean=false): Structure {
     val trimmed = value.trim()
     when {
         trimmed.contains(alphaCheck) -> {
-            return Structure(ERROR_TYPE, "Invalid alphabetic characters in number type value")
+            return Structure(ERROR_TYPE, "Invalid alphabetic characters in number type value \"$trimmed\"")
         }
         trimmed.contains(".") -> {
             // probably a decimal

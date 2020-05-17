@@ -55,7 +55,7 @@ class MathSubOperator: Operator("-") {
             var output = ""
             // now try and combine them, prefering the more precise type
             if (leftSide.type==MathTypes.FLOAT.string || rightSide.type==MathTypes.FLOAT.string) {
-                output = (leftSide.value.toFloat() - rightSide.value.toFloat()).toString()
+                output = (leftSide.value.toDouble() - rightSide.value.toDouble()).toString()
             } else {
                 output = (leftSide.value.toInt() - rightSide.value.toInt()).toString()
             }

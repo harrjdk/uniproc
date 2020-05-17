@@ -6,14 +6,9 @@ import uniproc.internal.operators.*
 import uniproc.internal.operators.fileio.FileAppendOperator
 import uniproc.internal.operators.fileio.FileReadOperator
 import uniproc.internal.operators.fileio.FileWriteOperator
-import uniproc.internal.operators.logic.EndProcedureOperator
-import uniproc.internal.operators.logic.ExecuteOperator
-import uniproc.internal.operators.logic.IfOperator
-import uniproc.internal.operators.logic.ProcedureOperator
-import uniproc.internal.operators.math.MathDivOperator
-import uniproc.internal.operators.math.MathMulOperator
-import uniproc.internal.operators.math.MathPlusOperator
-import uniproc.internal.operators.math.MathSubOperator
+import uniproc.internal.operators.logic.*
+import uniproc.internal.operators.math.*
+import uniproc.internal.operators.text.*
 import uniproc.types.Structure
 import java.io.File
 import java.nio.charset.Charset
@@ -21,28 +16,29 @@ import java.util.*
 import kotlin.collections.HashMap
 
 val OPERATIONS = listOf<Operator>(
-        DocOperation(),
-        RaiseOperator(),
-        PrintOperator(),
-        InputOperator(),
-        AssignmentOperator(),
-        HistoryOperator(),
-        MathPlusOperator(),
-        MathSubOperator(),
-        MathMulOperator(),
-        MathDivOperator(),
-        FileReadOperator(),
-        FileWriteOperator(),
-        FileAppendOperator(),
-        EndProcedureOperator(),
-        ProcedureOperator(),
-        ExecuteOperator(),
-        IfOperator()
+        // core operations
+        ExitOperator(), DocOperation(), RaiseOperator(), PrintOperator(), InputOperator(), AssignmentOperator(),
+        ClearOperator(), HistoryOperator(), BlankOperator(), ArgOperator(),
+        // math operations
+        MathPlusOperator(), MathSubOperator(), MathMulOperator(), MathDivOperator(), MathSqrtOperator(),
+        MathPowOperator(), MathLogOperator(), MathSinOperator(), MathCosOperator(), MathTanOperator(),
+        MathArcSinOperator(), MathArcCosOperator(), MathArcTanOperator(),
+        // file operations
+        FileReadOperator(), FileWriteOperator(), FileAppendOperator(),
+        // procedure operations
+        EndProcedureOperator(), ProcedureOperator(), ExecuteOperator(),
+        // logic control operations
+        IfOperator(), EqualsOperator(), GreaterThanEqOperator(), GreaterThanOperator(), LessThanEqOperator(),
+        LessThanOperator(), NotEqualsOperator(),
+        // text manipulation operations
+        ExplodeOperator(), AtIndexOperator(), LengthOperator(), ConcatOperator(), StringEqualsOperator(),
+        StringNotEqualsOperator()
 )
 
 class Vm(val verbose: Boolean = false) {
 
     val valueSnapShotThreshold = 2
+    var exit = false
 
     private val history = LinkedList<String>()
 
@@ -111,6 +107,40 @@ class Vm(val verbose: Boolean = false) {
         return false
     }
 
+    fun setArg(index: Int, value: String) {
+        variables["%$index"] = Structure("String", value)
+    }
+
+    fun getArg(name: String, type: String="String"): Structure {
+        // args are uniquely different than variables
+        // args are incoming to an executing script
+        // and are accessed via %1, %2, etc
+        var nameRef = name.trim()
+        if (!nameRef.startsWith("%")) {
+            nameRef = "%$nameRef"
+        }
+        return variables[nameRef]?:Structure("String", "")
+    }
+
+    fun delVar(name: String) {
+        var nameRef = name.trim()
+        if (!nameRef.startsWith("@")) {
+            nameRef = "@$nameRef"
+        }
+        if (variables.containsKey(nameRef)) {
+            for (i in valueSnapShotThreshold downTo 1) {
+                if (verbose) {
+                    println("[DEBUG] Clearing ${nameRef}.previous$i")
+                }
+                variables.remove("${nameRef}.previous$i")
+            }
+        }
+        if (verbose) {
+            println("[DEBUG] Clearing $nameRef")
+        }
+        variables.remove(nameRef)
+    }
+
     fun setVar(name: String, value: Structure) {
         var nameRef = name.trim()
         if (!nameRef.startsWith("@")) {
@@ -145,7 +175,7 @@ class Vm(val verbose: Boolean = false) {
     fun handleTokens(tokens: List<List<Token>>, debug: Boolean=true): Boolean {
         tokens.forEach {
             var unhandledTokens = it
-            while (unhandledTokens.isNotEmpty()) {
+            while (unhandledTokens.isNotEmpty() && !exit) {
                 val currentToken = unhandledTokens[0]
                 if (currentToken.type == OPERATION_TOKEN) {
                     if (verbose) {
@@ -168,7 +198,15 @@ class Vm(val verbose: Boolean = false) {
                     }
                 } else if (currentToken.type == ERROR_TOKEN) {
                     display("ERROR! ${currentToken.value}")
+                    exit = true
                     return false
+                } else if (currentToken.type == EXIT_TOKEN) {
+                    exit = true
+                    unhandledTokens = emptyList()
+                    if (verbose) {
+                        println("[DEBUG] exiting due to exit token")
+                    }
+                    return true
                 } else {
                     // we shouldn't have a line like this?
                     if (verbose) {
@@ -180,11 +218,11 @@ class Vm(val verbose: Boolean = false) {
             }
         }
         // sanity checks
-        if (inputBufferClaim.isNotEmpty()) {
+        if (verbose && inputBufferClaim.isNotEmpty()) {
             println("WARNING! Input Buffer was unclaimed. This suggests bad assignment!")
             inputBufferClaim = ""
         }
-        if (valueBuffer != NULL) {
+        if (verbose && valueBuffer != NULL) {
             println("WARNING! Value Buffer was unclaimed! This suggests a missing operation!")
             valueBuffer = NULL
         }
