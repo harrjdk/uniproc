@@ -16,6 +16,8 @@ Implemented:
 * Assign
 * File IO
 * Control Statements
+* Some casting (strings -> number)
+* some arithmetic
 
 To Do:
 * Arithmetic

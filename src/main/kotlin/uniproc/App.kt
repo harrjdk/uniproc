@@ -28,7 +28,7 @@ class App: CliktCommand() {
                 while(!parser.myVm.exit) {
                     print("> ")
                     val line = readLine()
-                    if (line!=null && line.isNotEmpty()) {
+                    if (!line.isNullOrEmpty()) {
                         parser.executeTokens(parser.parseLine(line), args)
                     } else {
                         break
@@ -53,7 +53,7 @@ class App: CliktCommand() {
                     }
                 } else if (outputPath != null && source != null && source!!.canRead()) {
                     val parser = Parser(verbose=verbose)
-                    val outFile = File(outputPath)
+                    val outFile = File(outputPath!!)
                     if (!outFile.exists()) {
                         outFile.createNewFile()
                     }
@@ -86,7 +86,7 @@ class App: CliktCommand() {
             System.err.println("No output file specified but cross-compile specified!")
             false
         } else if (source != null && !source.canRead()){
-            System.err.println("Cannot read input file \"${source?.absoluteFile}\"!")
+            System.err.println("Cannot read input file \"${source.absoluteFile}\"!")
             false
         } else {
             true
