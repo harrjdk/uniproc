@@ -20,11 +20,14 @@ Implemented:
 * some arithmetic
 
 To Do:
-* Arithmetic
-* Casting
-* String formatting
+* Arithmetic (have the obvious ones to me but could always add more)
+* Casting (everything is a string until it needs to be a number or ordered collection right now)
+* String formatting (might be nice?)
+* Importing/Loading (mostly done. I need to look into loading java files so new operations could be added)
 
+Long-term low priority goals that might be changing
 Compile to Target:
+#### This is incredible low priority
 
 To Do:
 
@@ -73,4 +76,4 @@ This is not okay:
 ```
 IF INPUT What's up? PRINT Foo!
 ```
-
+See the examples for more details

@@ -16,7 +16,7 @@ class FileReadOperator: Operator("READ") {
         }
         val contents = vm.getFileContents(filePath)
         return if (contents != null) {
-            if (!vm.populateInputBuffer(contents!!, "String")) {
+            if (!vm.populateInputBuffer(contents, "String")) {
                 vm.display(contents)
             }
             emptyList()

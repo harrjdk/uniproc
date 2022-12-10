@@ -1,22 +1,17 @@
 package uniproc
 
 import uniproc.internal.Token
-import java.io.File
+import java.util.*
 
 // As functionality is added, we should add more reserved words
 // These are more or less going to be translated into macros
 // and idioms in the target language
 val RESERVED_WORDS = OPERATIONS.map { it.name }
-val res_old = listOf(
-        "PRINT", "READ", "INPUT", "WRITE", "APPEND",
-        "+", "-", "/", "*", "RAISE", "ASSIGN", "HISTORY",
-        "DOC"
-)
-val OPERATION_TOKEN = "OPERATOR"
-val VALUE_TOKEN = "VALUE"
-val ERROR_TOKEN = "ERROR"
-val EXIT_TOKEN = "EXIT"
-val NULL_TOKEN = "NULL"
+const val OPERATION_TOKEN = "OPERATOR"
+const val VALUE_TOKEN = "VALUE"
+const val ERROR_TOKEN = "ERROR"
+const val EXIT_TOKEN = "EXIT"
+const val NULL_TOKEN = "NULL"
 val NULL = Token(NULL_TOKEN, "")
 
 open class Parser(val verbose: Boolean = true, vm: Vm = Vm(verbose = verbose)) {
@@ -29,7 +24,7 @@ open class Parser(val verbose: Boolean = true, vm: Vm = Vm(verbose = verbose)) {
         myVm.addHistory(line)
 
         // parsing uniproc is easy, we read left to right and pick up reserved words
-        // since this is made to every day users, concepts of quoted strings and such
+        // since this is made for everyday users, concepts of quoted strings and such
         // are meaningless
         // Begin reading until we hit a space
         val tokens = ArrayList<Token>()
@@ -45,7 +40,7 @@ open class Parser(val verbose: Boolean = true, vm: Vm = Vm(verbose = verbose)) {
             if (currentChar == ' ' || counter == line.length-1) {
                 // create a token from the item, this is not precise at this point.
                 tokens.add(Token(
-                        if (RESERVED_WORDS.contains(buffer.toUpperCase().trim())) OPERATION_TOKEN else VALUE_TOKEN,
+                        if (RESERVED_WORDS.contains(buffer.uppercase(Locale.getDefault()).trim())) OPERATION_TOKEN else VALUE_TOKEN,
                         buffer
                 ))
                 buffer = ""
@@ -83,11 +78,11 @@ open class Parser(val verbose: Boolean = true, vm: Vm = Vm(verbose = verbose)) {
     fun getCompiledCode(className: String): String {
         return """
             public class $className {
-            ${myVm.supportMetaData.toString()}
+            ${myVm.supportMetaData}
             ${myVm.supportMethods.map{
             entry ->
             """public static void ${entry.key} {
-                |${entry.value.toString()}
+                |${entry.value}
                 |}
             """.trimMargin()
                 }.joinToString("\n")

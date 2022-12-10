@@ -1,4 +1,6 @@
+DOC Assign name and show the previous value!
 ASSIGN @NAME Old World
 ASSIGN @NAME New World
+DOC Print those values!
 PRINT Hello, @NAME
 PRINT Hello, @NAME.previous1

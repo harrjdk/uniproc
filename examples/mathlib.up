@@ -1,0 +1,8 @@
+PROCEDURE ADD
+DOC This shows the last assigned stack.
+ASSIGN @ADD_OUT @~ + @~
+END
+
+PROCEDURE SUB
+ASSIGN @SUB_OUT @SUB_IN1 - @SUB_IN2
+END

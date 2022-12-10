@@ -17,17 +17,19 @@ class App: CliktCommand() {
     private val verbose by option("--verbose", "-v", help="Enable Verbose Logging").flag(default = false)
     private val interactive by option("--interactive", "-r", help="Start in interactive REPL mode").flag()
     private val outputPath by option("--output", "-o", help="Output File Path")
+    private val allowIncompleteFeatures by option("-e", "--incomplete", help="Allow incomplete features")
+        .flag(default = false)
     private val targetLanguage by option("-t", "--target", help="Target compile language")
     private val source by option("-i", "--input").file()
     private val args: List<String> by option("-a", "-args").multiple()
     override fun run() {
-        if (validateArgs(interactive, outputPath, targetLanguage, source)) {
+        if (validateArgs(interactive, outputPath, targetLanguage, allowIncompleteFeatures, source)) {
             if (interactive) {
                 // all we can do for now is print a demo
                 val parser = Parser(verbose=verbose)
                 while(!parser.myVm.exit) {
                     print("> ")
-                    val line = readLine()
+                    val line = readlnOrNull()
                     if (!line.isNullOrEmpty()) {
                         parser.executeTokens(parser.parseLine(line), args)
                     } else {
@@ -75,7 +77,8 @@ class App: CliktCommand() {
         }
     }
 
-    private fun validateArgs(interactive: Boolean, outputPath: String?, targetLanguage: String?, source: File?): Boolean {
+    private fun validateArgs(interactive: Boolean, outputPath: String?, targetLanguage: String?,
+                             allowIncompleteFeatures: Boolean, source: File?): Boolean {
         return if (interactive && (outputPath != null || source != null)) {
             System.err.println("Cannot start in interactive mode and have an output or input file!")
             false
@@ -87,6 +90,9 @@ class App: CliktCommand() {
             false
         } else if (source != null && !source.canRead()){
             System.err.println("Cannot read input file \"${source.absoluteFile}\"!")
+            false
+        } else if (!allowIncompleteFeatures && targetLanguage != null) {
+            System.err.println("Experimental/Incomplete features not enabled explicitly!")
             false
         } else {
             true
